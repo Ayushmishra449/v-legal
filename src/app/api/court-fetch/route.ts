@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
-    let courtData = null;
+    let courtData: any = null;
     let source = "manual";
 
     try {
