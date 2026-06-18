@@ -24,7 +24,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const config = await prisma.fieldConfig.update({ where: { id }, data: parsed.data });
+  const config = await prisma.fieldConfig.update({ where: { id }, data: parsed.data as any });
   return NextResponse.json(config);
 }
 

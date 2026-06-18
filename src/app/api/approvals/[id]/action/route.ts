@@ -63,7 +63,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (actionType === "APPROVED") {
     // Check if there are more workflow steps
     const steps = approval.workflow?.steps ?? [];
-    const nextStep = steps.find((s) => s.stepOrder === approval.currentStep + 1);
+    const nextStep = steps.find((s: any) => s.stepOrder === approval.currentStep + 1);
     if (nextStep) {
       // Move to next step — find a user with that role
       newStep = nextStep.stepOrder;

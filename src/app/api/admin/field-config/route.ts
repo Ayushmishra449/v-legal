@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   try {
-    const config = await prisma.fieldConfig.create({ data: parsed.data });
+    const config = await prisma.fieldConfig.create({ data: parsed.data as any });
     return NextResponse.json(config, { status: 201 });
   } catch (err: any) {
     if (err.code === "P2002") {
