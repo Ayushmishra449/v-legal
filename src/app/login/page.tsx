@@ -8,6 +8,7 @@ import { loginSchema, LoginInput } from "@/lib/validations";
 import { toast } from "sonner";
 import { Loader2, Lock, Mail } from "lucide-react";
 import Image from "next/image";
+import vsLogo from "../../../public/vs-logo.png";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,17 +48,13 @@ export default function LoginPage() {
         <div className="absolute -right-[120px] -bottom-[120px] w-[360px] h-[360px] rounded-full bg-white/5 pointer-events-none" />
 
         <div>
-          <div className="rounded-2xl bg-white shadow-xl px-5 py-4 inline-block">
-            <Image
-              src="/vs-logo.png"
-              alt="Vikram Solar Logo"
-              width={220}
-              height={56}
-              className="object-contain h-[56px] w-auto"
-              priority
-              unoptimized
-            />
-          </div>
+          <Image
+            src={vsLogo}
+            alt="Vikram Solar Logo"
+            height={64}
+            className="object-contain h-[64px] w-auto"
+            priority
+          />
         </div>
 
         <div className="relative z-10 my-8">
@@ -83,17 +80,13 @@ export default function LoginPage() {
 
           {/* Mobile Logo Only */}
           <div className="md:hidden flex flex-col items-start gap-3 mb-8">
-            <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-4 py-2.5 inline-block">
-              <Image
-                src="/vs-logo.png"
-                alt="Vikram Solar Logo"
-                width={180}
-                height={40}
-                className="object-contain h-[40px] w-auto"
-                priority
-                unoptimized
-              />
-            </div>
+            <Image
+              src={vsLogo}
+              alt="Vikram Solar Logo"
+              height={44}
+              className="object-contain h-[44px] w-auto"
+              priority
+            />
             <div>
               <div className="text-[#231f20] font-bold text-xl">V-Legal</div>
               <div className="text-gray-500 text-sm">Vikram Solar</div>
