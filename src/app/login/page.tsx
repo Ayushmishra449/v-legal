@@ -48,13 +48,15 @@ export default function LoginPage() {
         <div className="absolute -right-[120px] -bottom-[120px] w-[360px] h-[360px] rounded-full bg-white/5 pointer-events-none" />
 
         <div>
-          <Image
-            src={vsLogo}
-            alt="Vikram Solar Logo"
-            height={64}
-            className="object-contain h-[64px] w-auto"
-            priority
-          />
+          <div className="rounded-2xl bg-white shadow-xl px-6 py-4 inline-block">
+            <Image
+              src={vsLogo}
+              alt="Vikram Solar Logo"
+              height={56}
+              className="object-contain h-[56px] w-auto"
+              priority
+            />
+          </div>
         </div>
 
         <div className="relative z-10 my-8">
@@ -80,13 +82,15 @@ export default function LoginPage() {
 
           {/* Mobile Logo Only */}
           <div className="md:hidden flex flex-col items-start gap-3 mb-8">
-            <Image
-              src={vsLogo}
-              alt="Vikram Solar Logo"
-              height={44}
-              className="object-contain h-[44px] w-auto"
-              priority
-            />
+            <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-4 py-3 inline-block">
+              <Image
+                src={vsLogo}
+                alt="Vikram Solar Logo"
+                height={40}
+                className="object-contain h-[40px] w-auto"
+                priority
+              />
+            </div>
             <div>
               <div className="text-[#231f20] font-bold text-xl">V-Legal</div>
               <div className="text-gray-500 text-sm">Vikram Solar</div>
