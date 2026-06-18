@@ -48,10 +48,14 @@ export default function LoginPage() {
 
         <div>
           <div className="rounded-2xl bg-white shadow-xl px-5 py-4 inline-block">
-            <img
+            <Image
               src="/vs-logo.png"
               alt="Vikram Solar Logo"
+              width={220}
+              height={56}
               className="object-contain h-[56px] w-auto"
+              priority
+              unoptimized
             />
           </div>
         </div>
@@ -80,10 +84,14 @@ export default function LoginPage() {
           {/* Mobile Logo Only */}
           <div className="md:hidden flex flex-col items-start gap-3 mb-8">
             <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-4 py-2.5 inline-block">
-              <img
+              <Image
                 src="/vs-logo.png"
                 alt="Vikram Solar Logo"
+                width={180}
+                height={40}
                 className="object-contain h-[40px] w-auto"
+                priority
+                unoptimized
               />
             </div>
             <div>
