@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["@prisma/client", "bcryptjs"],
+  typescript: { ignoreBuildErrors: false },
+  devIndicators: false,
 };
 
 export default nextConfig;

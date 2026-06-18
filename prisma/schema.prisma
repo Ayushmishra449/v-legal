@@ -1,0 +1,410 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  LEGAL_TEAM
+  FINANCE
+  VIEWER
+}
+
+enum MatterStatus {
+  ONGOING
+  SETTLED
+  CLOSED
+  DISMISSED
+  STAY_GRANTED
+}
+
+enum MatterType {
+  CIVIL
+  ARBITRATION
+  REGULATORY
+  WRIT_ADMINISTRATIVE
+  CRIMINAL
+  LABOUR
+  LAND_ACQUISITION
+  CONTRACT_DISPUTE
+}
+
+enum MatterStage {
+  PRE_FILING
+  PLEADINGS
+  EVIDENCE
+  ARGUMENTS
+  RESERVED
+  ORDER_RECEIVED
+  EXECUTION
+}
+
+enum HearingType {
+  INITIAL
+  ARGUMENTS
+  EVIDENCE
+  ORDER
+  MENTION
+}
+
+enum HearingStatus {
+  SCHEDULED
+  HEARD
+  ADJOURNED
+  ORDER_PASSED
+}
+
+enum InvoiceType {
+  COUNSEL_FEES
+  ARBITRATOR_FEES
+  MISC
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REJECTED
+}
+
+enum PendingAtStage {
+  PR_INDENT_CREATION
+  PO_CREATION
+  PO_RELEASE
+  SRN_CREATION
+  ACCOUNTS_PROCESSING
+  MANAGEMENT_APPROVAL
+  PAYMENT_RELEASED
+}
+
+enum DocumentType {
+  PETITION_PLAINT
+  COURT_ORDER
+  EVIDENCE
+  LEGAL_NOTICE
+  CONTRACT
+  CORRESPONDENCE
+  OTHER
+}
+
+enum NoticeDirection {
+  SENT
+  RECEIVED
+}
+
+enum NoticeStatus {
+  PENDING_REPLY
+  REPLIED
+  SENT
+  NO_REPLY_REQUIRED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
+  REASSIGNED
+}
+
+enum ApprovalModule {
+  DOCUMENT
+  MATTER
+  INVOICE
+  HEARING
+  NOTICE
+  OTHER
+}
+
+enum ApprovalActionType {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  REASSIGNED
+  REVOKED
+  COMMENTED
+}
+
+model ApprovalWorkflow {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  module      ApprovalModule
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  steps     ApprovalWorkflowStep[]
+  approvals Approval[]
+
+  @@map("approval_workflows")
+}
+
+model ApprovalWorkflowStep {
+  id           String   @id @default(cuid())
+  workflowId   String
+  stepOrder    Int
+  stepName     String
+  approverRole Role
+  description  String?
+  createdAt    DateTime @default(now())
+
+  workflow ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, stepOrder])
+  @@map("approval_workflow_steps")
+}
+
+model Approval {
+  id             String         @id @default(cuid())
+  approvalId     String         @unique
+  title          String
+  description    String?        @db.Text
+  module         ApprovalModule
+  moduleRefId    String?
+  moduleRefLabel String?
+  oneDriveLink   String?
+  workflowId     String?
+  currentStep    Int            @default(1)
+  status         ApprovalStatus @default(PENDING)
+  priority       String         @default("NORMAL")
+  dueDate        DateTime?
+
+  submittedById     String
+  currentApproverId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submittedBy     User              @relation("SubmittedApprovals", fields: [submittedById], references: [id])
+  currentApprover User?             @relation("AssignedApprovals", fields: [currentApproverId], references: [id])
+  workflow        ApprovalWorkflow? @relation(fields: [workflowId], references: [id])
+  actions         ApprovalAction[]
+
+  @@map("approvals")
+}
+
+model ApprovalAction {
+  id         String             @id @default(cuid())
+  approvalId String
+  actorId    String
+  actionType ApprovalActionType
+  comment    String?            @db.Text
+  toUserId   String?
+  toUserName String?
+  fromStep   Int?
+  toStep     Int?
+  createdAt  DateTime           @default(now())
+
+  approval Approval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+  actor    User     @relation("ApprovalActorActions", fields: [actorId], references: [id])
+
+  @@map("approval_actions")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(VIEWER)
+  avatar    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  matters           Matter[]
+  hearings          Hearing[]
+  invoices          Invoice[]
+  documents         Document[]
+  notices           Notice[]
+  auditLogs         AuditLog[]
+  documentApprovals DocumentApproval[]
+
+  submittedApprovals Approval[]       @relation("SubmittedApprovals")
+  assignedApprovals  Approval[]       @relation("AssignedApprovals")
+  approvalActions    ApprovalAction[] @relation("ApprovalActorActions")
+
+  @@map("users")
+}
+
+model Matter {
+  id             String       @id @default(cuid())
+  matterId       String       @unique
+  name           String
+  oppositeParty  String
+  court          String
+  caseNumber     String?
+  type           MatterType   @default(CIVIL)
+  stage          MatterStage  @default(PRE_FILING)
+  nextHearing    DateTime?
+  limitationDate DateTime?
+  counsel        String?
+  internalOwner  String?
+  exposure       Decimal?     @db.Decimal(15, 2)
+  status         MatterStatus @default(ONGOING)
+  remarks        String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  hearings  Hearing[]
+  invoices  Invoice[]
+  documents Document[]
+  notices   Notice[]
+
+  @@map("matters")
+}
+
+model Hearing {
+  id        String        @id @default(cuid())
+  hearingId String        @unique
+  date      DateTime
+  type      HearingType   @default(INITIAL)
+  status    HearingStatus @default(SCHEDULED)
+  outcome   String?       @db.Text
+  nextDate  DateTime?
+  docLink   String?
+  updatedBy String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  matter   Matter @relation(fields: [matterId], references: [id])
+  matterId String
+
+  createdByUser User   @relation(fields: [createdById], references: [id])
+  createdById   String
+
+  @@map("hearings")
+}
+
+model Invoice {
+  id            String          @id @default(cuid())
+  invoiceId     String          @unique
+  vendor        String
+  billNo        String?
+  date          DateTime
+  amount        Decimal         @db.Decimal(15, 2)
+  type          InvoiceType     @default(COUNSEL_FEES)
+  paymentStatus PaymentStatus   @default(PENDING)
+  pendingAt     PendingAtStage?
+  paymentDate   DateTime?
+  remarks       String?         @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  matter   Matter? @relation(fields: [matterId], references: [id])
+  matterId String?
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  @@map("invoices")
+}
+
+model Document {
+  id         String       @id @default(cuid())
+  docId      String       @unique
+  name       String
+  type       DocumentType @default(OTHER)
+  date       DateTime?
+  uploadedBy String?
+  version    String?
+  fileLink   String?
+  remarks    String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  matter   Matter? @relation(fields: [matterId], references: [id])
+  matterId String?
+
+  createdByUser User   @relation(fields: [createdById], references: [id])
+  createdById   String
+
+  approvals DocumentApproval[]
+
+  @@map("documents")
+}
+
+model Notice {
+  id           String          @id @default(cuid())
+  noticeId     String          @unique
+  direction    NoticeDirection @default(RECEIVED)
+  counterparty String
+  date         DateTime
+  replyDue     DateTime?
+  status       NoticeStatus    @default(PENDING_REPLY)
+  subject      String
+  noticeLink   String?
+  replyLink    String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  matter   Matter? @relation(fields: [matterId], references: [id])
+  matterId String?
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  @@map("notices")
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  action    AuditAction
+  table     String
+  recordId  String
+  oldData   Json?
+  newData   Json?
+  createdAt DateTime    @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@map("audit_logs")
+}
+
+model DocumentApproval {
+  id            String         @id @default(cuid())
+  documentId    String
+  approverEmail String
+  requestedById String
+  status        ApprovalStatus @default(PENDING)
+  comments      String?        @db.Text
+  approvedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  requestedBy User     @relation(fields: [requestedById], references: [id])
+
+  @@map("document_approvals")
+}
+
+model FieldConfig {
+  id         String   @id @default(cuid())
+  module     String
+  fieldKey   String
+  label      String
+  options    Json?
+  isRequired Boolean  @default(false)
+  isVisible  Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([module, fieldKey])
+  @@map("field_configs")
+}
