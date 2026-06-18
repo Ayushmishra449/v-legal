@@ -1,6 +1,13 @@
 import { cn } from "@/lib/utils";
-import { MatterStatus, HearingStatus, PaymentStatus, NoticeStatus, NoticeDirection, Role } from "@prisma/client";
 import { ROLE_COLORS, ROLE_LABELS } from "@/lib/rbac";
+
+// Local string literal types — mirrors Prisma enums without depending on generated client
+type MatterStatus = "ONGOING" | "SETTLED" | "CLOSED" | "DISMISSED" | "STAY_GRANTED";
+type HearingStatus = "SCHEDULED" | "HEARD" | "ADJOURNED" | "ORDER_PASSED";
+type PaymentStatus = "PENDING" | "PAID" | "REJECTED";
+type NoticeStatus = "PENDING_REPLY" | "REPLIED" | "SENT" | "NO_REPLY_REQUIRED";
+type NoticeDirection = "RECEIVED" | "SENT";
+type Role = "SUPER_ADMIN" | "ADMIN" | "LEGAL_TEAM" | "FINANCE" | "VIEWER";
 
 type PillVariant = "blue" | "green" | "red" | "amber" | "purple" | "gray" | "teal";
 
